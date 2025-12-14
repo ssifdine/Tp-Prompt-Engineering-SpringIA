@@ -1,0 +1,1096 @@
+<div class="app-container">
+  <!-- En-tête moderne avec dégradé -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="url(#gradient)"/>
+            <path d="M16 8L24 16L16 24L8 16L16 8Z" fill="white" opacity="0.9"/>
+            <defs>
+              <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#667eea"/>
+                <stop offset="100%" stop-color="#764ba2"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1>{{ title || 'Assistant IA' }}</h1>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-icon" (click)="toggleHistory()" [class.active]="showHistory">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9h18M3 15h18M9 3v18"/>
+          </svg>
+          <span>Historique</span>
+        </button>
+        <button class="btn-icon btn-danger-outline" (click)="clearConversation()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Effacer</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <!-- Zone de chat principale avec design moderne -->
+    <div class="chat-container" [class.with-history]="showHistory">
+
+      <!-- Configuration élégante -->
+      <div class="model-config">
+        <div class="config-card">
+          <div class="config-item">
+            <label for="model">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              Modèle IA
+            </label>
+            <select id="model" [(ngModel)]="selectedModel" class="form-select">
+              <option *ngFor="let model of availableModels" [value]="model.value">
+                {{ model.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="config-item">
+            <label for="temperature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+              </svg>
+              Créativité
+              <span class="temperature-value">{{ temperature }}</span>
+            </label>
+            <input
+              type="range"
+              id="temperature"
+              min="0"
+              max="1"
+              step="0.1"
+              [(ngModel)]="temperature"
+              class="form-range"
+            />
+            <div class="range-labels">
+              <span>Précis</span>
+              <span>Créatif</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone des messages avec design épuré -->
+      <div class="messages-container" #messagesContainer>
+        <div
+          *ngFor="let message of messages"
+          class="message"
+          [ngClass]="{
+            'message-user': message.isUser,
+            'message-ai': !message.isUser && !message.isSystem,
+            'message-system': message.isSystem
+          }"
+        >
+          <div class="message-wrapper">
+            <div class="message-avatar">
+              <span *ngIf="message.isUser">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              </span>
+              <span *ngIf="!message.isUser && !message.isSystem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                </svg>
+              </span>
+              <span *ngIf="message.isSystem">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+              </span>
+            </div>
+
+            <div class="message-content">
+              <div class="message-text">{{ message.content }}</div>
+              <div class="message-meta">
+                <span class="message-time">{{ message.timestamp | date:'HH:mm' }}</span>
+                <span *ngIf="message.responseTime" class="response-time">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  {{ message.responseTime }}ms
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicateur de chargement moderne -->
+        <div *ngIf="isLoading" class="message message-ai">
+          <div class="message-wrapper">
+            <div class="message-avatar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+            </div>
+            <div class="message-content">
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone de saisie moderne -->
+      <div class="input-container">
+        <div class="input-wrapper">
+          <textarea
+            [(ngModel)]="userMessage"
+            (keypress)="onKeyPress($event)"
+            placeholder="Posez votre question..."
+            class="message-input"
+            rows="1"
+            [disabled]="isLoading"
+          ></textarea>
+
+          <div class="input-actions">
+            <button class="btn-icon-small" title="Ajouter un fichier">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
+
+            <button
+              (click)="sendMessage()"
+              [disabled]="!userMessage.trim() || isLoading"
+              class="btn-send"
+            >
+              <svg *ngIf="!isLoading" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              <svg *ngIf="isLoading" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="input-hint">
+          <kbd>Enter</kbd> pour envoyer • <kbd>Shift</kbd> + <kbd>Enter</kbd> pour nouvelle ligne
+        </div>
+      </div>
+    </div>
+
+    <!-- Panneau d'historique moderne -->
+    <div class="history-panel" *ngIf="showHistory">
+      <div class="history-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Historique
+        </h3>
+        <button class="btn-icon-small btn-danger" (click)="clearHistory()" title="Tout effacer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="history-list">
+        <div *ngIf="chatHistory.length === 0" class="empty-history">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <p>Aucune conversation</p>
+          <span>Commencez une nouvelle conversation</span>
+        </div>
+
+        <div
+          *ngFor="let item of chatHistory; let i = index"
+          class="history-item"
+        >
+          <div class="history-item-header">
+            <div class="history-badge">#{{ chatHistory.length - i }}</div>
+            <div class="history-info">
+              <span class="history-time">{{ item.timestamp | date:'dd/MM/yy à HH:mm' }}</span>
+              <span class="history-model-badge">{{ item.model }}</span>
+            </div>
+          </div>
+
+          <div class="history-messages">
+            <div class="history-user-msg">
+              <div class="history-msg-label">Vous</div>
+              <div class="history-msg-text">{{ item.userMessage }}</div>
+            </div>
+            <div class="history-ai-msg">
+              <div class="history-msg-label">Assistant</div>
+              <div class="history-msg-text">{{ item.aiResponse }}</div>
+            </div>
+          </div>
+
+          <div class="history-meta">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            {{ item.responseTime }}ms
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .app-container {
+    height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* En-tête moderne */
+  .app-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+
+  .header-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-icon.active {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-danger-outline {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-danger-outline:hover {
+    background: rgba(239, 68, 68, 0.25);
+  }
+
+  /* Contenu principal */
+  .main-content {
+    flex: 1;
+    display: flex;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    min-height: 0;
+    height: 100%;
+  }
+
+  /* Configuration moderne */
+  .model-config {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9ff 0%, #fdfbff 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .config-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .config-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .config-item label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .temperature-value {
+    margin-left: auto;
+    padding: 0.125rem 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+  }
+
+  .form-select {
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .form-select:hover {
+    border-color: #667eea;
+  }
+
+  .form-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .form-range {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, #667eea 0%, #764ba2 100%);
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-range:hover {
+    opacity: 1;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    border: 2px solid #667eea;
+  }
+
+  .form-range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    border: 2px solid #667eea;
+  }
+
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  /* Zone des messages */
+  .messages-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .messages-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .messages-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .messages-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  .messages-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .message {
+    display: flex;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .message-user {
+    justify-content: flex-end;
+  }
+
+  .message-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    max-width: 75%;
+    align-items: flex-start;
+  }
+
+  .message-user .message-wrapper {
+    flex-direction: row-reverse;
+  }
+
+  .message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .message-user .message-avatar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .message-ai .message-avatar {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+  }
+
+  .message-system .message-avatar {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+  }
+
+  .message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .message-text {
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    word-wrap: break-word;
+  }
+
+  .message-user .message-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .message-ai .message-text {
+    background: #f3f4f6;
+    color: #1f2937;
+    border-bottom-left-radius: 4px;
+  }
+
+  .message-system .message-text {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
+    border-bottom-left-radius: 4px;
+  }
+
+  .message-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 0.25rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  .response-time {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* Indicateur de frappe */
+  .typing-indicator {
+    display: flex;
+    gap: 0.375rem;
+    padding: 1rem 1.25rem;
+    background: #f3f4f6;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+  }
+
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9ca3af;
+    animation: bounce 1.4s infinite ease-in-out;
+  }
+
+  .typing-indicator span:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+
+  .typing-indicator span:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+
+  @keyframes bounce {
+    0%, 80%, 100% {
+      transform: scale(0);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Zone de saisie moderne */
+  .input-container {
+    padding: 1.5rem;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .input-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .input-wrapper:focus-within {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .message-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    max-height: 150px;
+  }
+
+  .message-input::placeholder {
+    color: #9ca3af;
+  }
+
+  .input-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .btn-icon-small {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-icon-small:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+
+  .btn-send {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-send:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .input-hint {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-align: center;
+  }
+
+  kbd {
+    padding: 0.125rem 0.375rem;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-family: monospace;
+  }
+
+  /* Panneau d'historique */
+  .history-panel {
+    width: 400px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    height: 100%;
+  }
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9ff 0%, #fdfbff 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .history-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .btn-danger:hover {
+    background: #fecaca;
+  }
+
+  .history-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+    min-height: 0;
+  }
+
+  .history-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .history-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .history-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  .empty-history {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #9ca3af;
+  }
+
+  .empty-history svg {
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .empty-history p {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .empty-history span {
+    font-size: 0.875rem;
+  }
+
+  .history-item {
+    padding: 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+  }
+
+  .history-item:hover {
+    background: white;
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .history-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .history-badge {
+    padding: 0.25rem 0.625rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .history-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+
+  .history-time {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  .history-model-badge {
+    padding: 0.125rem 0.5rem;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+  }
+
+  .history-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .history-user-msg,
+  .history-ai-msg {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .history-msg-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .history-msg-text {
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .history-user-msg .history-msg-text {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-color: rgba(102, 126, 234, 0.2);
+  }
+
+  .history-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .main-content {
+      flex-direction: column;
+    }
+
+    .history-panel {
+      width: 100%;
+      max-height: 400px;
+    }
+
+    .config-card {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .app-header {
+      padding: 1rem;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+    }
+
+    .header-actions {
+      gap: 0.5rem;
+    }
+
+    .btn-icon span {
+      display: none;
+    }
+
+    .main-content {
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    .message-wrapper {
+      max-width: 90%;
+    }
+
+    .history-panel {
+      width: 100%;
+    }
+  }
+
+  /* Animations supplémentaires */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .chat-container,
+  .history-panel {
+    animation: fadeIn 0.3s ease;
+  }
+
+  /* Mode focus pour l'input */
+  .input-wrapper:focus-within .btn-send {
+    background: linear-gradient(135deg, #5568d3 0%, #6a3f91 100%);
+  }
+
+  /* Scrollbar personnalisée pour webkit */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  /* États de chargement */
+  .btn-send:disabled .spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Amélioration des transitions */
+  * {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  button, .form-select, .message-input {
+    transition: all 0.2s ease;
+  }
+
+  /* Effet glassmorphism léger */
+  .app-header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* Ombres et profondeur */
+  .message-text {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .message-user .message-text {
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+  }
+
+  /* États hover améliorés */
+  .history-item {
+    cursor: pointer;
+  }
+
+  .form-select option {
+    padding: 0.5rem;
+  }
+
+  /* Accessibilité */
+  button:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+
+  /* Print styles */
+  @media print {
+    .app-header,
+    .input-container,
+    .history-panel {
+      display: none;
+    }
+
+    .messages-container {
+      height: auto;
+      overflow: visible;
+    }
+  }
+</style>
